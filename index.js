@@ -28,10 +28,8 @@ let items_old = [
 app.get("/", async (req, res) => {
  
   
- // fetchData();
-
- try {
-  const result = await db.query("SELECT * from items");
+  try {
+  const result = await db.query("SELECT * FROM items ORDER BY id ASC");
 
     const data = result.rows;
     items = data;
@@ -69,32 +67,41 @@ app.post("/add", async (req, res) => {
   
 });
 
-app.post("/edit", (req, res) => {});
+app.post("/edit", async (req, res) => {
 
-app.post("/delete", (req, res) => {});
+  const updatedItemId = req.body.updatedItemId;
+  const updatedItemTitle = req.body.updatedItemTitle;
+
+  try {
+    await db.query("UPDATE items SET title = ($1) WHERE id = $2", [updatedItemTitle, updatedItemId]);
+    res.redirect("/");
+  } catch (err) {
+    console.log(err);
+  }
+
+
+
+});
+
+app.post("/delete", async (req, res) => {
+
+  const deltedItemId = req.body.deleteItemId;
+ 
+  try {
+    await db.query("DELETE FROM items WHERE id = $1", [deltedItemId]);
+    res.redirect("/");
+  } catch (err) {
+    console.log(err);
+  }
+
+
+
+
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-
-async function fetchData() {
-  try {
-    const result = await db.query("SELECT * from items");
-  
-    if (result && result.rows && result.rows.length > 0) {
-      const data = result.rows;
-      console.log(data);
-      items = data;
-    } else {
-      console.log("No rows found");
-    }
-  
-  } catch (err) {
-    console.log(err);
-  }
-  return items
-} 
 
 async function postData(dataToPost) {
 
